@@ -19,13 +19,10 @@ export const deleteAccount:RequestHandler = async(req, res, next)=>{
 }
 
 export const saveAccount:RequestHandler = async(req, res, next)=>{
-    const account = {...req.body}
-    const secretKey = JSON.stringify(crypto.randomBytes(32));
-    //const saveAccount = new Account(account)
-    console.log({key:process.env.KEY})
+
     try{
         //const saveRes = await saveAccount.save()
-        res.send(jsend.success({secretKey,envkey:process.env.KEY}));
+        res.send(jsend.success({}));
     }catch(err){
         logger.error(err)
     }

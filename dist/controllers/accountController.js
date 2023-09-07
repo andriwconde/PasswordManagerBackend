@@ -16,7 +16,6 @@ exports.saveAccount = exports.deleteAccount = exports.updateAccount = void 0;
 const jsend_1 = __importDefault(require("jsend"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const helpers_1 = require("../helpers");
-const crypto_1 = __importDefault(require("crypto"));
 dotenv_1.default.config();
 const updateAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
 });
@@ -25,13 +24,9 @@ const deleteAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, func
 });
 exports.deleteAccount = deleteAccount;
 const saveAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const account = Object.assign({}, req.body);
-    const secretKey = JSON.stringify(crypto_1.default.randomBytes(32));
-    //const saveAccount = new Account(account)
-    console.log({ key: process.env.KEY });
     try {
         //const saveRes = await saveAccount.save()
-        res.send(jsend_1.default.success({ secretKey, envkey: process.env.KEY }));
+        res.send(jsend_1.default.success({}));
     }
     catch (err) {
         helpers_1.logger.error(err);
