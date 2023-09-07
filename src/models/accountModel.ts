@@ -1,21 +1,15 @@
 import mongoose from "mongoose";
 
 const AccountSchema = new mongoose.Schema({
-    name:{
+    account:{
         type: String,
         required: true,
         trim: true
     },
-    username:{
-        type: String,
-        required: true,
-        trim: true
-    },
-    password: {
-        type: String,
-        required: true,
-        trim: true,
-    }
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Author', 
+      },
 });
 
 const Account = mongoose.model('Account',AccountSchema); 

@@ -21,11 +21,11 @@ main().catch(err => helpers_1.logger.error(err));
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield mongoose_1.default.connect(`mongodb+srv://cluster0.mjvcmx0.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority`, {
+            yield mongoose_1.default.connect(process.env.DB_QUERYSTRING, {
                 sslValidate: true,
-                tlsCertificateKeyFile: './src/database/X509-cert-5815967020738054664.pem',
-                authMechanism: 'MONGODB-X509',
-                authSource: '$external'
+                tlsCertificateKeyFile: process.env.DB_CERTIFICATE_LOCATION,
+                authMechanism: process.env.DB_AUTH_METHOD,
+                authSource: process.env.DB_AUTH_SRC
             });
             helpers_1.logger.info('mongodb conected');
         }

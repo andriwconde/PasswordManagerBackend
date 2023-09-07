@@ -8,12 +8,12 @@ main().catch(err => logger.error(err));
 
 async function main() {
   try{
-    await mongoose.connect(`mongodb+srv://cluster0.mjvcmx0.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority` as string,{
+    await mongoose.connect(process.env.DB_QUERYSTRING as string,{
       sslValidate: true,
-      tlsCertificateKeyFile: './src/database/X509-cert-5815967020738054664.pem',
-      authMechanism: 'MONGODB-X509',
-      authSource: '$external'
-    })
+      tlsCertificateKeyFile: process.env.DB_CERTIFICATE_LOCATION,
+      authMechanism: process.env.DB_AUTH_METHOD,
+      authSource: process.env.DB_AUTH_SRC
+    } as object)
     logger.info('mongodb conected');
   }catch(error){
     console.log({error})

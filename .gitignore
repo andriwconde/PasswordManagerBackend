@@ -1,3 +1,4 @@
 node_modules/
 .env
 logs/
+src/database/X509-cert-5815967020738054664.pem
