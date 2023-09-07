@@ -21,8 +21,8 @@ export const deleteAccount:RequestHandler = async(req, res, next)=>{
 export const saveAccount:RequestHandler = async(req, res, next)=>{
 
     try{
-        //const saveRes = await saveAccount.save()
-        res.send(jsend.success({}));
+
+        res.send(jsend.success({'hola':'hola'}));
     }catch(err){
         logger.error(err)
     }

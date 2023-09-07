@@ -5,6 +5,7 @@ const userController_1 = require("../controllers/userController");
 const router = (0, express_1.Router)();
 router.post('/login', userController_1.userLogin);
 router.post('/bioLogin', userController_1.bioLogin);
+router.post('/userKeysInterchange', userController_1.userKeysInterchange);
 router.post('/register', userController_1.userRegister);
 router.get('/version', /*jwtValidator,*/ userController_1.getVersion);
 exports.default = router;

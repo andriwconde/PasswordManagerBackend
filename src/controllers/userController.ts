@@ -13,7 +13,7 @@ dotenv.config();
 export const userLogin: RequestHandler = async (req, res, next)=>{
     const expirationTime = parseInt(process.env.JWT_EXPIRE_TIME as string)
     try{
-        if(req.body.email !== null && req.body.password !== null && req.body.publicKey === null){
+        if(req.body.email !== null && req.body.password !== null && req.body.bioPK === null){
             console.log({body:req.body})
             const user = await User.find({email:req.body.email})
             if(user.length){
@@ -30,7 +30,7 @@ export const userLogin: RequestHandler = async (req, res, next)=>{
                                 id:user[0]._id,
                                 email: user[0].email,
                                 name: user[0].name,
-                                publicKey:false
+                                bioPK:false
                             }
                         })) 
                     }else{
@@ -40,7 +40,7 @@ export const userLogin: RequestHandler = async (req, res, next)=>{
             }else{
                 res.send(jsend.error(`username or password incorrect`))
             }
-        }else if(req.body.email !== null && req.body.password !== null && typeof req.body.publicKey === 'string'){
+        }else if(req.body.email !== null && req.body.password !== null && typeof req.body.bioPK === 'string'){
             const user = await User.find({email:req.body.email})
             if(user[0]._id && user[0].password !== req.body.password){
                 bcrypt.compare(req.body.password,user[0].password,async (err,result)=>{
@@ -48,14 +48,14 @@ export const userLogin: RequestHandler = async (req, res, next)=>{
                         console.log({err})
                         res.send(jsend.error(err))
                     }else if(result){
-                        const setPublicKey = await User.updateOne({email:req.body.email},{$set:{publicKey: req.body.publicKey}})
-                        if(setPublicKey.acknowledged){
+                        const setbioPK = await User.updateOne({email:req.body.email},{$set:{bioPK: req.body.bioPK}})
+                        if(setbioPK.acknowledged){
                             res.send(jsend.success({
                                 user: {
                                     id:user[0]._id,
                                     email: user[0].email,
                                     name: user[0].name,
-                                    publicKey:true
+                                    bioPK:true
                                 }
                             })) 
                         }
@@ -81,7 +81,7 @@ export const bioLogin:RequestHandler = async(req, res, next)=>{
         const verifier = crypto.createVerify('RSA-SHA256');
         verifier.update(payload);
         const isVerified = verifier.verify(
-            `-----BEGIN PUBLIC KEY-----\n${user[0].publicKey}\n-----END PUBLIC KEY-----`,
+            `-----BEGIN PUBLIC KEY-----\n${user[0].bioPK}\n-----END PUBLIC KEY-----`,
             signature, 'base64'
           );
         if(!isVerified){
@@ -92,7 +92,7 @@ export const bioLogin:RequestHandler = async(req, res, next)=>{
                     id:user[0]._id,
                     email: user[0].email,
                     name: user[0].name,
-                    publicKey:true
+                    bioPK:true
                 }
             }))
         }
@@ -100,6 +100,11 @@ export const bioLogin:RequestHandler = async(req, res, next)=>{
         res.send(jsend.error(err as string))
         logger.error(err)
     }
+}
+
+export const userKeysInterchange:RequestHandler = async(req, res, next)=>{
+
+    await User.updateOne({_id:req.body.user_id},{$set:{bioPK: req.body.bioPK}})
 }
 
 export const userRegister: RequestHandler =(req, res, next)=>{

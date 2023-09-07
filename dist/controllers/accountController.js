@@ -25,8 +25,7 @@ const deleteAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, func
 exports.deleteAccount = deleteAccount;
 const saveAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        //const saveRes = await saveAccount.save()
-        res.send(jsend_1.default.success({}));
+        res.send(jsend_1.default.success({ 'hola': 'hola' }));
     }
     catch (err) {
         helpers_1.logger.error(err);

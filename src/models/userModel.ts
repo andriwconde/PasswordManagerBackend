@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
             }
         }
     },
-    publicKey:{
+    bioPK:{
         type: String,
         unique: true,
     }

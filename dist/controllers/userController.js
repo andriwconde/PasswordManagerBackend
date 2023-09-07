@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getVersion = exports.userRegister = exports.bioLogin = exports.userLogin = void 0;
+exports.getVersion = exports.userRegister = exports.userKeysInterchange = exports.bioLogin = exports.userLogin = void 0;
 const userModel_1 = __importDefault(require("../models/userModel"));
 const jsend_1 = __importDefault(require("jsend"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -25,7 +25,7 @@ dotenv_1.default.config();
 const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const expirationTime = parseInt(process.env.JWT_EXPIRE_TIME);
     try {
-        if (req.body.email !== null && req.body.password !== null && req.body.publicKey === null) {
+        if (req.body.email !== null && req.body.password !== null && req.body.bioPK === null) {
             console.log({ body: req.body });
             const user = yield userModel_1.default.find({ email: req.body.email });
             if (user.length) {
@@ -43,7 +43,7 @@ const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                                 id: user[0]._id,
                                 email: user[0].email,
                                 name: user[0].name,
-                                publicKey: false
+                                bioPK: false
                             }
                         }));
                     }
@@ -56,7 +56,7 @@ const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                 res.send(jsend_1.default.error(`username or password incorrect`));
             }
         }
-        else if (req.body.email !== null && req.body.password !== null && typeof req.body.publicKey === 'string') {
+        else if (req.body.email !== null && req.body.password !== null && typeof req.body.bioPK === 'string') {
             const user = yield userModel_1.default.find({ email: req.body.email });
             if (user[0]._id && user[0].password !== req.body.password) {
                 bcrypt_1.default.compare(req.body.password, user[0].password, (err, result) => __awaiter(void 0, void 0, void 0, function* () {
@@ -65,14 +65,14 @@ const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                         res.send(jsend_1.default.error(err));
                     }
                     else if (result) {
-                        const setPublicKey = yield userModel_1.default.updateOne({ email: req.body.email }, { $set: { publicKey: req.body.publicKey } });
-                        if (setPublicKey.acknowledged) {
+                        const setbioPK = yield userModel_1.default.updateOne({ email: req.body.email }, { $set: { bioPK: req.body.bioPK } });
+                        if (setbioPK.acknowledged) {
                             res.send(jsend_1.default.success({
                                 user: {
                                     id: user[0]._id,
                                     email: user[0].email,
                                     name: user[0].name,
-                                    publicKey: true
+                                    bioPK: true
                                 }
                             }));
                         }
@@ -98,7 +98,7 @@ const bioLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         const user = yield userModel_1.default.find({ _id: userId });
         const verifier = crypto_1.default.createVerify('RSA-SHA256');
         verifier.update(payload);
-        const isVerified = verifier.verify(`-----BEGIN PUBLIC KEY-----\n${user[0].publicKey}\n-----END PUBLIC KEY-----`, signature, 'base64');
+        const isVerified = verifier.verify(`-----BEGIN PUBLIC KEY-----\n${user[0].bioPK}\n-----END PUBLIC KEY-----`, signature, 'base64');
         if (!isVerified) {
             res.send(jsend_1.default.error({ message: 'Unfortunetely we could not verify your Biometric authentication', code: 401 }));
         }
@@ -108,7 +108,7 @@ const bioLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
                     id: user[0]._id,
                     email: user[0].email,
                     name: user[0].name,
-                    publicKey: true
+                    bioPK: true
                 }
             }));
         }
@@ -119,6 +119,10 @@ const bioLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.bioLogin = bioLogin;
+const userKeysInterchange = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    yield userModel_1.default.updateOne({ _id: req.body.user_id }, { $set: { bioPK: req.body.bioPK } });
+});
+exports.userKeysInterchange = userKeysInterchange;
 const userRegister = (req, res, next) => {
     bcrypt_1.default.hash(req.body.password, 8, (err, hash) => __awaiter(void 0, void 0, void 0, function* () {
         if (err) {
