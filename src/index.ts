@@ -1,5 +1,6 @@
 import express from 'express';
 import userRoutes from './routes/userRoutes';
+import accountRoutes from './routes/accountRoutes'
 import './database/mongoose';
 import dotenv from 'dotenv'
 import {logger} from './helpers'
@@ -9,6 +10,7 @@ dotenv.config();
 app.use(express.json());
 
 app.use('/user', userRoutes);
+app.use('/account', accountRoutes );
 
 app.listen(port,()=>{
     logger.info(`Server listening on port: ${port} at http://localhost:${port}`);

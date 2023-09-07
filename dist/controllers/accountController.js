@@ -12,26 +12,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importDefault(require("mongoose"));
+exports.saveAccount = exports.deleteAccount = exports.updateAccount = void 0;
+const jsend_1 = __importDefault(require("jsend"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const helpers_1 = require("../helpers");
+const crypto_1 = __importDefault(require("crypto"));
 dotenv_1.default.config();
-mongoose_1.default.set('strictQuery', true);
-main().catch(err => helpers_1.logger.error(err));
-function main() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            yield mongoose_1.default.connect(`mongodb+srv://cluster0.mjvcmx0.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority`, {
-                sslValidate: true,
-                tlsCertificateKeyFile: './src/database/X509-cert-5815967020738054664.pem',
-                authMechanism: 'MONGODB-X509',
-                authSource: '$external'
-            });
-            helpers_1.logger.info('mongodb conected');
-        }
-        catch (error) {
-            console.log({ error });
-            helpers_1.logger.error(error);
-        }
-    });
-}
+const updateAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+});
+exports.updateAccount = updateAccount;
+const deleteAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+});
+exports.deleteAccount = deleteAccount;
+const saveAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const account = Object.assign({}, req.body);
+    const secretKey = JSON.stringify(crypto_1.default.randomBytes(32));
+    //const saveAccount = new Account(account)
+    console.log({ key: process.env.KEY });
+    try {
+        //const saveRes = await saveAccount.save()
+        res.send(jsend_1.default.success({ secretKey, envkey: process.env.KEY }));
+    }
+    catch (err) {
+        helpers_1.logger.error(err);
+    }
+});
+exports.saveAccount = saveAccount;

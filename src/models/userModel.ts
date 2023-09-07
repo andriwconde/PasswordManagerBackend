@@ -33,7 +33,7 @@ const UserSchema = new mongoose.Schema({
         }
     },
     publicKey:{
-        type: String || Boolean,
+        type: String,
         unique: true,
     }
 });

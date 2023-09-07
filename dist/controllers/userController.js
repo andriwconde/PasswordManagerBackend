@@ -56,7 +56,7 @@ const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                 res.send(jsend_1.default.error(`username or password incorrect`));
             }
         }
-        else if (req.body.email !== null && req.body.password !== null && req.body.publicKey !== null) {
+        else if (req.body.email !== null && req.body.password !== null && typeof req.body.publicKey === 'string') {
             const user = yield userModel_1.default.find({ email: req.body.email });
             if (user[0]._id && user[0].password !== req.body.password) {
                 bcrypt_1.default.compare(req.body.password, user[0].password, (err, result) => __awaiter(void 0, void 0, void 0, function* () {
@@ -99,8 +99,6 @@ const bioLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         const verifier = crypto_1.default.createVerify('RSA-SHA256');
         verifier.update(payload);
         const isVerified = verifier.verify(`-----BEGIN PUBLIC KEY-----\n${user[0].publicKey}\n-----END PUBLIC KEY-----`, signature, 'base64');
-        console.log({ user: user[0] });
-        console.log({ isVerified });
         if (!isVerified) {
             res.send(jsend_1.default.error({ message: 'Unfortunetely we could not verify your Biometric authentication', code: 401 }));
         }
@@ -127,12 +125,16 @@ const userRegister = (req, res, next) => {
             console.log(err);
         }
         else if (hash) {
-            const test = Object.assign(Object.assign({}, req.body), { password: hash });
-            console.log({ test });
-            const user = new userModel_1.default(Object.assign(Object.assign({}, req.body), { password: hash }));
+            const user = {
+                name: req.body.name,
+                surname: req.body.surname,
+                email: req.body.email,
+                password: hash
+            };
+            const userRes = new userModel_1.default(user);
             try {
-                yield user.save();
-                res.send(jsend_1.default.success(user));
+                yield userRes.save();
+                res.send(jsend_1.default.success(userRes));
             }
             catch (error) {
                 res.send(jsend_1.default.error(error));

@@ -40,7 +40,7 @@ export const userLogin: RequestHandler = async (req, res, next)=>{
             }else{
                 res.send(jsend.error(`username or password incorrect`))
             }
-        }else if(req.body.email !== null && req.body.password !== null && req.body.publicKey !== null){
+        }else if(req.body.email !== null && req.body.password !== null && typeof req.body.publicKey === 'string'){
             const user = await User.find({email:req.body.email})
             if(user[0]._id && user[0].password !== req.body.password){
                 bcrypt.compare(req.body.password,user[0].password,async (err,result)=>{
@@ -84,8 +84,6 @@ export const bioLogin:RequestHandler = async(req, res, next)=>{
             `-----BEGIN PUBLIC KEY-----\n${user[0].publicKey}\n-----END PUBLIC KEY-----`,
             signature, 'base64'
           );
-        console.log({user:user[0]})
-        console.log({isVerified})
         if(!isVerified){
             res.send(jsend.error({message:'Unfortunetely we could not verify your Biometric authentication' , code: 401} ))
         }else{
@@ -110,12 +108,17 @@ export const userRegister: RequestHandler =(req, res, next)=>{
         if(err){
             console.log(err)
         }else if(hash){
-            const test = {...req.body, password: hash}
-            console.log({test})
-            const user = new User({...req.body, password: hash})
+            const user = {
+                name:req.body.name,
+                surname:req.body.surname,
+                email:req.body.email,
+                password: hash
+                }
+            
+            const userRes = new User(user)
             try{
-                await user.save()
-                res.send(jsend.success(user));
+                await userRes.save()
+                res.send(jsend.success(userRes));
             }catch(error){
                 res.send(jsend.error(error as string))
                 logger.error(error)

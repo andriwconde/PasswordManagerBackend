@@ -9,7 +9,7 @@ router.post('/bioLogin', bioLogin);
 
 router.post('/register', userRegister);
 
-router.get('/version', jwtValidator, getVersion);
+router.get('/version', /*jwtValidator,*/ getVersion);
 
 export default router
 
