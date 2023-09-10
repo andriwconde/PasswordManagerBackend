@@ -35,6 +35,11 @@ const UserSchema = new mongoose.Schema({
     bioPK:{
         type: String,
         unique: true,
+    },
+    frontPK:{
+        type: String,
+        required: false,
+        unique: true,
     }
 });
 

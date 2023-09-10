@@ -7,7 +7,7 @@ router.post('/login', userLogin);
 
 router.post('/bioLogin', bioLogin);
 
-router.post('/userKeysInterchange', userKeysInterchange);
+router.post('/userKeysInterchange', jwtValidator, userKeysInterchange);
 
 router.post('/register', userRegister);
 

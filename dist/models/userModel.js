@@ -39,6 +39,11 @@ const UserSchema = new mongoose_1.default.Schema({
     bioPK: {
         type: String,
         unique: true,
+    },
+    frontPK: {
+        type: String,
+        required: false,
+        unique: true,
     }
 });
 const User = mongoose_1.default.model('Users', UserSchema);

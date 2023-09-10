@@ -2,8 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const accountController_1 = require("../controllers/accountController");
+const helpers_1 = require("../helpers");
 const router = (0, express_1.Router)();
-router.post('/update', accountController_1.updateAccount);
-router.post('/delete', accountController_1.deleteAccount);
-router.post('/add', accountController_1.saveAccount);
+router.post('/getAccounts' /* , jwtValidator */, accountController_1.getAccounts);
+router.post('/getAccount' /* , jwtValidator */, accountController_1.getAccount);
+router.post('/add', helpers_1.jwtValidator, accountController_1.saveAccount);
+router.post('/update', /* jwtValidator, */ accountController_1.updateAccount);
+router.post('/delete', /* jwtValidator, */ accountController_1.deleteAccount);
 exports.default = router;

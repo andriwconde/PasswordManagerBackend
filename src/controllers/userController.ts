@@ -5,16 +5,15 @@ import bcrypt from "bcrypt";
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import { jwtValidator,logger } from "../helpers";
+import fs from "fs"
 import moment from "moment";
 import crypto from "crypto";
 
 dotenv.config();
 
 export const userLogin: RequestHandler = async (req, res, next)=>{
-    const expirationTime = parseInt(process.env.JWT_EXPIRE_TIME as string)
     try{
         if(req.body.email !== null && req.body.password !== null && req.body.bioPK === null){
-            console.log({body:req.body})
             const user = await User.find({email:req.body.email})
             if(user.length){
                 bcrypt.compare(req.body.password,user[0].password,async (err,result)=>{
@@ -22,10 +21,11 @@ export const userLogin: RequestHandler = async (req, res, next)=>{
                         console.log({err})
                         res.send(jsend.error(err))
                     }else if(result){
-                        const token = jwt.sign({userId:user[0]._id,email: user[0].email}, process.env.TOKEN_KEY as string,{expiresIn: expirationTime}) 
+                        const expirationTime = parseInt(process.env.JWT_EXPIRE_TIME as string)
+                        const token = jwt.sign({user_id:user[0]._id,email: user[0].email}, process.env.TOKEN_KEY as string,{expiresIn: expirationTime}) 
                         res.send(jsend.success({
                             token,
-                            tokenExpDate: moment().add(1,'h').format("DD-MM-YYYYTHH:mm:ss"),
+                            tokenExpDate: moment().add(10,'m').format("DD-MM-YYYYTHH:mm:ss"),
                             user: {
                                 id:user[0]._id,
                                 email: user[0].email,
@@ -74,10 +74,8 @@ export const userLogin: RequestHandler = async (req, res, next)=>{
 export const bioLogin:RequestHandler = async(req, res, next)=>{
     const {payload,signature} = req.body
     try{
-        console.log(payload)
-        const userId = payload.split('__')[1]
-        const user = await User.find({ _id: userId })
-
+        const user_id = payload.split('__')[1]
+        const user = await User.find({ _id: user_id })
         const verifier = crypto.createVerify('RSA-SHA256');
         verifier.update(payload);
         const isVerified = verifier.verify(
@@ -87,7 +85,11 @@ export const bioLogin:RequestHandler = async(req, res, next)=>{
         if(!isVerified){
             res.send(jsend.error({message:'Unfortunetely we could not verify your Biometric authentication' , code: 401} ))
         }else{
+            const expirationTime = parseInt(process.env.JWT_EXPIRE_TIME as string)
+            const token = jwt.sign({user_id:user[0]._id,email: user[0].email}, process.env.TOKEN_KEY as string,{expiresIn: expirationTime}) 
             res.send(jsend.success({
+                token,
+                tokenExpDate: moment().add(10,'m').format("DD-MM-YYYYTHH:mm:ss"),
                 user: {
                     id:user[0]._id,
                     email: user[0].email,
@@ -103,8 +105,15 @@ export const bioLogin:RequestHandler = async(req, res, next)=>{
 }
 
 export const userKeysInterchange:RequestHandler = async(req, res, next)=>{
-
-    await User.updateOne({_id:req.body.user_id},{$set:{bioPK: req.body.bioPK}})
+    try{
+        
+        await User.updateOne({_id:req.body.user_id},{$set:{frontPK: req.body.frontPK}})
+        const publicKey = fs.readFileSync('./certificates/public-key.pem')
+        res.send(jsend.success({backendPK:publicKey.toString()}));
+    }catch(err){
+        console.log(err)
+    }
+        
 }
 
 export const userRegister: RequestHandler =(req, res, next)=>{
@@ -112,18 +121,16 @@ export const userRegister: RequestHandler =(req, res, next)=>{
     bcrypt.hash(req.body.password,8, async(err,hash)=>{
         if(err){
             console.log(err)
-        }else if(hash){
-            const user = {
+        }else if(hash){            
+            const newUser = new User({
                 name:req.body.name,
                 surname:req.body.surname,
                 email:req.body.email,
                 password: hash
-                }
-            
-            const userRes = new User(user)
+                })
             try{
-                await userRes.save()
-                res.send(jsend.success(userRes));
+                await newUser.save()
+                res.send(jsend.success(newUser));
             }catch(error){
                 res.send(jsend.error(error as string))
                 logger.error(error)

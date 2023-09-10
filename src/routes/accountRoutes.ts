@@ -1,13 +1,16 @@
 import { Router } from 'express';
-import  { saveAccount, deleteAccount, updateAccount }  from "../controllers/accountController"
+import  { saveAccount, deleteAccount, updateAccount, getAccounts, getAccount }  from "../controllers/accountController"
 import { jwtValidator } from '../helpers';
 const router = Router();
 
-router.post('/update', updateAccount);
+router.post('/getAccounts'/* , jwtValidator */, getAccounts);
 
-router.post('/delete', deleteAccount);
+router.post('/getAccount'/* , jwtValidator */, getAccount);
 
-router.post('/add', saveAccount);
+router.post('/add', jwtValidator,  saveAccount);
 
+router.post('/update', /* jwtValidator, */ updateAccount);
+
+router.post('/delete', /* jwtValidator, */ deleteAccount);
 
 export default router
