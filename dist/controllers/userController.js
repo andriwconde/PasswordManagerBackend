@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getVersion = exports.userRegister = exports.userKeysInterchange = exports.bioLogin = exports.userLogin = void 0;
+exports.getVersion = exports.userRegister = exports.getPublicKey = exports.userFPK = exports.bioLogin = exports.userLogin = void 0;
 const userModel_1 = __importDefault(require("../models/userModel"));
 const jsend_1 = __importDefault(require("jsend"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -24,11 +24,19 @@ const moment_1 = __importDefault(require("moment"));
 const crypto_1 = __importDefault(require("crypto"));
 dotenv_1.default.config();
 const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const privateKey = fs_1.default.readFileSync('./certificates/private-key.pem');
+    const encryptedMessageBuffer = Buffer.from(req.body.encryptedAccount, 'base64');
+    const decryptedMessageBuffer = crypto_1.default.privateDecrypt({
+        key: privateKey,
+        padding: crypto_1.default.constants.RSA_PKCS1_PADDING,
+    }, encryptedMessageBuffer);
+    const decryptedMessage = decryptedMessageBuffer.toString('utf8');
+    const decryptedParsedAccount = JSON.parse(decryptedMessage);
     try {
-        if (req.body.email !== null && req.body.password !== null && req.body.bioPK === null) {
-            const user = yield userModel_1.default.find({ email: req.body.email });
+        if (decryptedParsedAccount.email !== null && decryptedParsedAccount.password !== null && decryptedParsedAccount.bioPK === null) {
+            const user = yield userModel_1.default.find({ email: decryptedParsedAccount.email });
             if (user.length) {
-                bcrypt_1.default.compare(req.body.password, user[0].password, (err, result) => __awaiter(void 0, void 0, void 0, function* () {
+                bcrypt_1.default.compare(decryptedParsedAccount.password, user[0].password, (err, result) => __awaiter(void 0, void 0, void 0, function* () {
                     if (err) {
                         console.log({ err });
                         res.send(jsend_1.default.error(err));
@@ -56,16 +64,16 @@ const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                 res.send(jsend_1.default.error(`username or password incorrect`));
             }
         }
-        else if (req.body.email !== null && req.body.password !== null && typeof req.body.bioPK === 'string') {
-            const user = yield userModel_1.default.find({ email: req.body.email });
-            if (user[0]._id && user[0].password !== req.body.password) {
-                bcrypt_1.default.compare(req.body.password, user[0].password, (err, result) => __awaiter(void 0, void 0, void 0, function* () {
+        else if (decryptedParsedAccount.email !== null && decryptedParsedAccount.password !== null && typeof decryptedParsedAccount.bioPK === 'string') {
+            const user = yield userModel_1.default.find({ email: decryptedParsedAccount.email });
+            if (user[0]._id && user[0].password !== decryptedParsedAccount.password) {
+                bcrypt_1.default.compare(decryptedParsedAccount.password, user[0].password, (err, result) => __awaiter(void 0, void 0, void 0, function* () {
                     if (err) {
                         console.log({ err });
                         res.send(jsend_1.default.error(err));
                     }
                     else if (result) {
-                        const setbioPK = yield userModel_1.default.updateOne({ email: req.body.email }, { $set: { bioPK: req.body.bioPK } });
+                        const setbioPK = yield userModel_1.default.updateOne({ _id: user[0]._id }, { $set: { bioPK: decryptedParsedAccount.bioPK } });
                         if (setbioPK.acknowledged) {
                             res.send(jsend_1.default.success({
                                 user: {
@@ -122,17 +130,29 @@ const bioLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.bioLogin = bioLogin;
-const userKeysInterchange = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const userFPK = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield userModel_1.default.updateOne({ _id: req.body.user_id }, { $set: { frontPK: req.body.frontPK } });
-        const publicKey = fs_1.default.readFileSync('./certificates/public-key.pem');
-        res.send(jsend_1.default.success({ backendPK: publicKey.toString() }));
+        console.log('setFPK');
+        console.log({ body: req.body });
+        const updteFPK = yield userModel_1.default.updateOne({ _id: req.body.user_id }, { $set: { frontPK: req.body.frontPK } });
+        if (updteFPK.acknowledged) {
+            res.send(jsend_1.default.success({ status: true, action: 'StoredFPK', msg: 'frontend public Key stored successfully' }));
+        }
+        else {
+            res.send(jsend_1.default.success({ status: false, action: 'StoredFPK', msg: 'error storing frontend public Key' }));
+        }
     }
     catch (err) {
-        console.log(err);
+        res.send(jsend_1.default.success({ status: false, action: 'StoredFPK', msg: 'error storing frontend public Key' }));
     }
 });
-exports.userKeysInterchange = userKeysInterchange;
+exports.userFPK = userFPK;
+const getPublicKey = (req, res, next) => {
+    const publicKey = fs_1.default.readFileSync('./certificates/public-key.pem');
+    console.log('getBPK');
+    res.send(jsend_1.default.success({ backendPK: publicKey.toString() }));
+};
+exports.getPublicKey = getPublicKey;
 const userRegister = (req, res, next) => {
     bcrypt_1.default.hash(req.body.password, 8, (err, hash) => __awaiter(void 0, void 0, void 0, function* () {
         if (err) {

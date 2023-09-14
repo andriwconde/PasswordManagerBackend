@@ -37,6 +37,19 @@ export const deleteAccount:RequestHandler = async(req, res, next)=>{
   }
 }
 
+export const deleteManyAccounts:RequestHandler = async(req, res, next)=>{
+  try{
+    const deleteAccounts = await Account.deleteMany({_id:{$in:req.body.accountsArray}})
+    if(deleteAccounts.acknowledged){
+      res.send(jsend.success({status: true, action:'Deleted' ,msg:'accounts deleted successfully'}))
+    }else{
+      res.send(jsend.success({status: false, action:'Deleted' , msg:'something was wrong deleting account', code:402}))
+    }
+  }catch(err){
+      logger.error(err)
+  }
+}
+
 export const getAccounts:RequestHandler = async(req, res, next)=>{
     const user_id = req.body.user_id
     const user = await User.find({_id:user_id})
@@ -104,9 +117,9 @@ export const saveAccount:RequestHandler = async(req, res, next)=>{
     try{
         const newAccountRes = await newAccount.save()
         if(typeof newAccountRes.account === 'string'){
-            res.send(jsend.success({newAccount}));
+          res.send(jsend.success({status: true, action:'Create' ,msg:'account created successfully'}))
         }else{
-            res.send(jsend.error('error saving account'));
+            res.send(jsend.success({status: false, action:'Create' ,msg:'error creating account'}));
         }
     }catch(err){
         logger.error(err)

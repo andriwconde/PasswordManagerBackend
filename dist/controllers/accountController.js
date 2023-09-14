@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveAccount = exports.getAccount = exports.getAccounts = exports.deleteAccount = exports.updateAccount = void 0;
+exports.saveAccount = exports.getAccount = exports.getAccounts = exports.deleteManyAccounts = exports.deleteAccount = exports.updateAccount = void 0;
 const accountModel_1 = __importDefault(require("../models/accountModel"));
 const jsend_1 = __importDefault(require("jsend"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -52,6 +52,21 @@ const deleteAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.deleteAccount = deleteAccount;
+const deleteManyAccounts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const deleteAccounts = yield accountModel_1.default.deleteMany({ _id: { $in: req.body.accountsArray } });
+        if (deleteAccounts.acknowledged) {
+            res.send(jsend_1.default.success({ status: true, action: 'Deleted', msg: 'accounts deleted successfully' }));
+        }
+        else {
+            res.send(jsend_1.default.success({ status: false, action: 'Deleted', msg: 'something was wrong deleting account', code: 402 }));
+        }
+    }
+    catch (err) {
+        helpers_1.logger.error(err);
+    }
+});
+exports.deleteManyAccounts = deleteManyAccounts;
 const getAccounts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const user_id = req.body.user_id;
     const user = yield userModel_1.default.find({ _id: user_id });
@@ -107,10 +122,10 @@ const saveAccount = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
     try {
         const newAccountRes = yield newAccount.save();
         if (typeof newAccountRes.account === 'string') {
-            res.send(jsend_1.default.success({ newAccount }));
+            res.send(jsend_1.default.success({ status: true, action: 'Create', msg: 'account created successfully' }));
         }
         else {
-            res.send(jsend_1.default.error('error saving account'));
+            res.send(jsend_1.default.success({ status: false, action: 'Create', msg: 'error creating account' }));
         }
     }
     catch (err) {
