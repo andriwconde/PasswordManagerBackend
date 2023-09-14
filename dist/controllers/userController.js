@@ -132,8 +132,6 @@ const bioLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
 exports.bioLogin = bioLogin;
 const userFPK = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log('setFPK');
-        console.log({ body: req.body });
         const updteFPK = yield userModel_1.default.updateOne({ _id: req.body.user_id }, { $set: { frontPK: req.body.frontPK } });
         if (updteFPK.acknowledged) {
             res.send(jsend_1.default.success({ status: true, action: 'StoredFPK', msg: 'frontend public Key stored successfully' }));
@@ -149,7 +147,6 @@ const userFPK = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
 exports.userFPK = userFPK;
 const getPublicKey = (req, res, next) => {
     const publicKey = fs_1.default.readFileSync('./certificates/public-key.pem');
-    console.log('getBPK');
     res.send(jsend_1.default.success({ backendPK: publicKey.toString() }));
 };
 exports.getPublicKey = getPublicKey;

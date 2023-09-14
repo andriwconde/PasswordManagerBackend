@@ -117,8 +117,6 @@ export const bioLogin:RequestHandler = async(req, res, next)=>{
 
 export const userFPK:RequestHandler = async(req, res, next)=>{
     try{
-        console.log('setFPK')
-        console.log({body:req.body})
         const updteFPK = await User.updateOne({_id:req.body.user_id},{$set:{frontPK: req.body.frontPK}})
         if (updteFPK.acknowledged){
             res.send(jsend.success({status: true, action:'StoredFPK' ,msg:'frontend public Key stored successfully'}));
@@ -133,7 +131,6 @@ export const userFPK:RequestHandler = async(req, res, next)=>{
 
 export const getPublicKey: RequestHandler = (req, res, next) =>{
     const publicKey = fs.readFileSync('./certificates/public-key.pem')
-        console.log('getBPK')
         res.send(jsend.success({backendPK:publicKey.toString()}));
 }
 
