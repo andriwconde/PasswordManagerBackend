@@ -22,7 +22,7 @@ function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield mongoose_1.default.connect(process.env.DB_QUERYSTRING, {
-                sslValidate: true,
+                tlsAllowInvalidCertificates: true,
                 tlsCertificateKeyFile: process.env.DB_CERTIFICATE_LOCATION,
                 authMechanism: process.env.DB_AUTH_METHOD,
                 authSource: process.env.DB_AUTH_SRC

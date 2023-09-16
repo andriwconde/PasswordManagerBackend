@@ -9,7 +9,7 @@ main().catch(err => logger.error(err));
 async function main() {
   try{
     await mongoose.connect(process.env.DB_QUERYSTRING as string,{
-      sslValidate: true,
+      tlsAllowInvalidCertificates: true,
       tlsCertificateKeyFile: process.env.DB_CERTIFICATE_LOCATION,
       authMechanism: process.env.DB_AUTH_METHOD,
       authSource: process.env.DB_AUTH_SRC

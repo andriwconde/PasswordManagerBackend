@@ -3,17 +3,16 @@ import  { saveAccount, deleteAccount, updateAccount, getAccounts, getAccount, de
 import { jwtValidator } from '../helpers';
 const router = Router();
 
-router.post('/getAccounts', /* jwtValidator, */ getAccounts);
+router.post('/getAccounts', jwtValidator, getAccounts);
 
 router.post('/getAccount', jwtValidator, getAccount);
 
-router.post('/add', /* jwtValidator, */  saveAccount);
+router.post('/add', jwtValidator,  saveAccount);
 
-router.post('/update', /* jwtValidator, */ updateAccount);
+router.post('/update', jwtValidator, updateAccount);
 
-router.post('/delete', /* jwtValidator, */ deleteAccount);
+router.post('/delete', jwtValidator, deleteAccount);
 
-
-router.post('/deleteMany', /* jwtValidator, */ deleteManyAccounts);
+router.post('/deleteMany', jwtValidator, deleteManyAccounts);
 
 export default router

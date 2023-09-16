@@ -37,14 +37,12 @@ const UserSchema = new mongoose_1.default.Schema({
         }
     },
     bioPK: {
-        type: String,
+        type: String || Boolean,
         required: false,
-        unique: true,
     },
     frontPK: {
-        type: String,
+        type: String || Boolean,
         required: false,
-        unique: true,
     }
 });
 const User = mongoose_1.default.model('Users', UserSchema);
